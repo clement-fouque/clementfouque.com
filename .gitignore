@@ -18,9 +18,9 @@
 
 ### Hugo ###
 # Generated files by hugo
-# /public/
-# /resources/_gen/
-# /assets/jsconfig.json
+blog/public/
+blog/resources/_gen/
+blog/assets/jsconfig.json
 hugo_stats.json
 
 # Executable may be added to repository
@@ -29,7 +29,7 @@ hugo.darwin
 hugo.linux
 
 # Temporary lock file while building
-/.hugo_build.lock
+blog/.hugo_build.lock
 
 ### macOS ###
 # General
