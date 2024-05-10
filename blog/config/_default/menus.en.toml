@@ -15,15 +15,29 @@
   pageRef = "posts"
   weight = 10
 
-[[main]]
-  name = "Categories"
-  pageRef = "categories"
-  weight = 20
+# [[main]]
+#   name = "Categories"
+#   pageRef = "categories"
+#   weight = 20
+
+# [[main]]
+#   name = "Tags"
+#   pageRef = "tags"
+#   weight = 30
 
 [[main]]
-  name = "Tags"
-  pageRef = "tags"
-  weight = 30
+  name = "About"
+  pageRef = "about"
+  weight = 40
+
+[[main]]
+  name = "GitHub"
+  url = "https://github.com/clement-fouque/blog.clementfouque.com"
+  weight = 50
+  [main.params]
+    icon = "github"
+    showName = false
+    target = "_blank"
 
 [[main]]
   identifier = "search"
