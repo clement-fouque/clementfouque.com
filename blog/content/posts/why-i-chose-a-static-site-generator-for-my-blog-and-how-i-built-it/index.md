@@ -1,9 +1,9 @@
 +++
 title = "Static Site Generator: Why and how I've built my blog with Hugo"
-date = 2024-05-08T21:57:08Z
+date = 2024-05-24
 summary = "Discover why and how a static site generator like Hugo can be a game-changer for your blog's security, performance, and cost efficiency."
 slug = 'hugo-static-site-blog'
-draft = true
+draft = false
 +++
 
 In this blog post, I'll explain why I've chosen the Hugo static site generator for my blog, how I built it, and how it's hosted.
@@ -24,7 +24,7 @@ I named the repository as the final domain that will be used to access the blog.
 
 The _.gitignore_ file will be generated later on.
 
-![Untitled](Untitled.png)
+![GitHub public repository creation](github-public-repository-creation.png)
 
 Then, I cloned the repository locally. I'm a big fan of GitHub Desktop as I don't need to remember the Git commands. I added a _.gitignore_ file generated from [toptal.com](https://www.toptal.com/developers/gitignore?templates=git,macos,visualstudiocode,hugo) with modules _git_, _MacOS_, _VisualStudioCode_, and _Hugo_. Due to the structure of my project (the Hugo site is in a subfolder), I modified the folder exceptions related to Hugo by adding _blog/_. I have the following:
 
@@ -76,7 +76,7 @@ It takes some time for the container to be created, especially at the beginning 
 
 To make sure my setup is correct, I checked the Hugo version with `hugo version`.
 
-![Untitled](Untitled%201.png)
+![Check hugo version installed](check-hugo-version-installed.png)
 
 ## Creating a Hugo website locally
 
@@ -119,7 +119,7 @@ path = "github.com/jpanther/congo/v2"
 
 Test of the website with `hugo server --source blog/ -D` finally gave some results. The website is accessible through [http://localhost:1313](http://localhost:1313/). 
 
-![Untitled](Untitled%202.png)
+![Hugo default page with Congo theme](hugo-congo-default-page.png)
 
 Now that the website is working, I modified the config files under _blog/config/_default_ . The [getting started documentation](https://jpanther.github.io/congo/docs/getting-started/) of the Congo theme is really complete. 
 
@@ -131,7 +131,7 @@ Then, I created a first blog post with `hugo new content $HUGO_SITE_NAME/posts/m
 
 GitHub offers the possibility to host static websites for free through GitHub Pages. In the Settings of the GitHub project, I set the Source to *GitHub Actions* (under *Build and deployment)* in the *Pages* section.
 
-![Untitled](Untitled%203.png)
+![Configure GitHub Pages to deploy a static website](github-pages-configuration.png)
 
 I added a workflow that will deploy my static website. The file is named _.github/workflows/deploy_hugo.yaml_ (the name can be changed, but not the folder). I modified the website with the help of the Hugo documentation to account for my folder structure (site under _/blog_ folder). Here is my final file, after updating multiple actions to their latest versions:
 
@@ -225,11 +225,11 @@ jobs:
 
 I committed this modification (under the main branch) and monitored the deployment under the *Actions* section of the GitHub repository.  
 
-![Untitled](Untitled%204.png)
+![Follow up deployment of GitHub pages workflow](github-pages-deployment.png)
 
 I checked the link from the deploy job to confirm that the deployment was successful: [https://clement-fouque.github.io/clementfouque.com/](https://clement-fouque.github.io/clementfouque.com/). Now, each time code is pushed to the main branch, the website will be rebuilt and deployed.
 
-![Untitled](Untitled%205.png)
+![Check GitHub pages successful deployment](check-github-pages-successful-deployment.png)
 
 ## Adding a domain to GitHub Pages
 
@@ -257,7 +257,7 @@ I also configured the IPv6 addresses because, well, why not?
 
 In the settings of the GitHub repository, the *Pages* section, I added my domain. I had to wait several minutes for the DNS check to be successful.
 
-![Untitled](Untitled%206.png)
+![GitHub pages custom domain configuration](github-pages-custom-domain-configuration.png)
 
 I encountered an issue where the CSS was not loading. I redeployed the website, and it was fixed.
 
