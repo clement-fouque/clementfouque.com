@@ -1,12 +1,12 @@
 +++
 title = "Static Site Generator: Why and how I've built my blog with Hugo"
 date = 2024-05-08T21:57:08Z
-summary = "In this blog post, I'll explain why I've chosen a static site generator for my blog, how I built it, and how it's hosted."
+summary = "Discover why and how a static site generator like Hugo can be a game-changer for your blog's security, performance, and cost efficiency."
 slug = 'hugo-static-site-blog'
 draft = true
 +++
 
-In this blog post, I'll explain why I've chosen Hugo static site generator for my blog, how I built it, and how it's hosted.
+In this blog post, I'll explain why I've chosen the Hugo static site generator for my blog, how I built it, and how it's hosted.
 
 ## Why using a static site generator and which one ?
 
@@ -16,9 +16,9 @@ In this blog post, I'll explain why I've chosen Hugo static site generator for m
 
 There are many static website generators like [Jekyll](https://jekyllrb.com/), [Gatsby](https://www.gatsbyjs.com/), [Hugo](https://gohugo.io/), [Eleventy](https://www.11ty.dev/), etc. I've chosen Hugo as there are [many free themes](https://themes.gohugo.io/), it's based on Golang, which I wanted to learn, and it has a super-fast build time compared to others. I didn't read nor write any Golang code, as it was unnecessary.
 
-## Create GitHub repository
+## Creating a GitHub repository
 
-### Create new repo in private
+### Creating a new repo in private
 
 I named the repository as the final domain that will be used to access the blog. To use GitHub Pages, we need to set the repository as public. For the licensing part, I followed the recommendation from GitHub as it's only text and not software that will be shared. I decided to use the Creative Commons license.
 
@@ -26,7 +26,7 @@ The _.gitignore_ file will be generated later on.
 
 ![Untitled](Untitled.png)
 
-Then, I cloned the repository locally. I'm a big fan of GitHub Desktop as I don't need to remember the Git commands. I added a _.gitignore_ file generated from [toptal.com](https://www.toptal.com/developers/gitignore?templates=git,macos,visualstudiocode,hugo) with modules _git_, _MacOS_, _VisualStudioCode_, and _Hugo_. Due to the structure of my project (Hugo site in a subfolder), I modified the folder exceptions related to Hugo by adding _blog/_. I have the following:
+Then, I cloned the repository locally. I'm a big fan of GitHub Desktop as I don't need to remember the Git commands. I added a _.gitignore_ file generated from [toptal.com](https://www.toptal.com/developers/gitignore?templates=git,macos,visualstudiocode,hugo) with modules _git_, _MacOS_, _VisualStudioCode_, and _Hugo_. Due to the structure of my project (the Hugo site is in a subfolder), I modified the folder exceptions related to Hugo by adding _blog/_. I have the following:
 
 ```
 ### Hugo ###
@@ -41,9 +41,9 @@ blog/assets/jsconfig.json
 blog/.hugo_build.lock
 ```
 
-## Configure your dev environment on a remote container
+## Configuring the dev environment on a remote container
 {{< alert "lightbulb">}}
-You need to install Docker on your system. [Install instructions](https://docs.docker.com/engine/install/) can be found on docker website.
+Docker needs to be installed on the system. [Install instructions](https://docs.docker.com/engine/install/) can be found on docker website.
 {{< /alert >}}
 
 I'm not a big fan of installing software on my workstation. I prefer to leverage Docker containers. Visual Studio Code has awesome capabilities to develop within a container, and it's fairly easy to set up.
@@ -78,11 +78,11 @@ To make sure my setup is correct, I checked the Hugo version with `hugo version`
 
 ![Untitled](Untitled%201.png)
 
-## Create Hugo website locally
+## Creating a Hugo website locally
 
 To create a new Hugo site, I executed this simple command: `hugo new site blog`. It creates a new blog folder with all required files inside.
 
-I launched the site with `hugo server --source blog/ -D`. I have a "Page Not Found" error, but it's expected as I didn't create any content at this point.
+I launched the site with `hugo server --source blog/ -D`. I have a "Page Not Found" error, I think it's because I haven't configure port forwarding correctly.
 
 ## Setting up the Hugo theme
 
@@ -117,7 +117,7 @@ Finally, I created a config file `code $HUGO_SITE_NAME/config/_default/module.to
 path = "github.com/jpanther/congo/v2"
 ```
 
-The test of the website with `hugo server --source blog/ -D` is finally giving some results. The website is accessible through [http://localhost:1313](http://localhost:1313/). 
+Test of the website with `hugo server --source blog/ -D` finally gave some results. The website is accessible through [http://localhost:1313](http://localhost:1313/). 
 
 ![Untitled](Untitled%202.png)
 
@@ -125,15 +125,15 @@ Now that the website is working, I modified the config files under _blog/config/
 
 Then, I created a first blog post with `hugo new content $HUGO_SITE_NAME/posts/my-first-post.md`
 
-## Deploy the site
+## Deploying the site
 
-### Add build and deploy workflow GitHub Actions
+### Adding build and deploy workflow GitHub Actions
 
 GitHub offers the possibility to host static websites for free through GitHub Pages. In the Settings of the GitHub project, I set the Source to *GitHub Actions* (under *Build and deployment)* in the *Pages* section.
 
 ![Untitled](Untitled%203.png)
 
-I added a workflow that will deploy my static website. The file is named _.github/workflows/deploy_hugo.yaml_ (the name can be changed, but not the path). I modified the website from the Hugo documentation to take into consideration my folder structure (site under _/blog_ folder). Here is my final file, after updating multiple actions to the latest version.
+I added a workflow that will deploy my static website. The file is named _.github/workflows/deploy_hugo.yaml_ (the name can be changed, but not the folder). I modified the website with the help of the Hugo documentation to account for my folder structure (site under _/blog_ folder). Here is my final file, after updating multiple actions to their latest versions:
 
 ```yaml
 # Sample workflow for building and deploying a Hugo site to GitHub Pages
@@ -231,11 +231,11 @@ I checked the link from the deploy job to confirm that the deployment was succes
 
 ![Untitled](Untitled%205.png)
 
-## Add a domain to GitHub Pages
+## Adding a domain to GitHub Pages
 
 ### DNS configuration
 
-As recommended by [GitHub documentation](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site), I pointed my apex domain to the 4 IPs associated with GitHub Pages with an A record.
+As recommended by [GitHub documentation](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site), I pointed my apex domain to the 4 IPv4s associated with GitHub Pages using an A record.
 
 ```
 185.199.108.153
@@ -244,7 +244,7 @@ As recommended by [GitHub documentation](https://docs.github.com/en/pages/config
 185.199.111.153
 ```
 
-I also configured the IPv6 because why not?
+I also configured the IPv6 addresses because, well, why not?
 
 ```
 2606:50c0:8000::153
@@ -253,28 +253,14 @@ I also configured the IPv6 because why not?
 2606:50c0:8003::153
 ```
 
-### Configure apex domain on GitHub
+### Configuring the apex domain on GitHub
 
 In the settings of the GitHub repository, the *Pages* section, I added my domain. I had to wait several minutes for the DNS check to be successful.
 
 ![Untitled](Untitled%206.png)
 
-I had an issue where CSS was not loaded. I redeployed the website, and it was fixed.
+I encountered an issue where the CSS was not loading. I redeployed the website, and it was fixed.
 
 ## Conclusion
 
-Using a static site generator for my blog has been a great decision. It has provided me with a simple, secure, and cost-efficient solution for maintaining my blog.
-
-## Side notes
-
-I’ve used Mistral AI to correct my english and improve readability. Here is the prompt I’ve used.
-
-```
-You will act as a writing expert specialized in reviewing content that I'll provide. You'll fix any grammar and improve the readability of the text.
-```
-
-I’ve used Mistral AI to generate ~~clickbait~~ catchy titles. Here is the prompt I used:
-
-```
-Can you provide 20 titles for this blog post?
-```
+Using a static site generator for my blog has been a great decision. It has provided a simple, secure, and cost-effective solution for maintaining my blog.
