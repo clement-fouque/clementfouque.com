@@ -1,12 +1,12 @@
 +++
-title = 'Why I Chose a Static Site Generator for My Blog and How I Built It'
+title = "Static Site Generator: Why and how I've built my blog with Hugo"
 date = 2024-05-08T21:57:08Z
 summary = "In this blog post, I'll explain why I've chosen a static site generator for my blog, how I built it, and how it's hosted."
 slug = 'hugo-static-site-blog'
 draft = true
 +++
 
-In this blog post, I'll explain why I've chosen a static site generator for my blog, how I built it, and how it's hosted.
+In this blog post, I'll explain why I've chosen Hugo static site generator for my blog, how I built it, and how it's hosted.
 
 ## Why using a static site generator and which one ?
 
@@ -41,7 +41,7 @@ blog/assets/jsconfig.json
 blog/.hugo_build.lock
 ```
 
-## Configure remote container
+## Configure your dev environment on a remote container
 {{< alert "lightbulb">}}
 You need to install Docker on your system. [Install instructions](https://docs.docker.com/engine/install/) can be found on docker website.
 {{< /alert >}}
@@ -78,13 +78,13 @@ To make sure my setup is correct, I checked the Hugo version with `hugo version`
 
 ![Untitled](Untitled%201.png)
 
-## Create Hugo website
+## Create Hugo website locally
 
 To create a new Hugo site, I executed this simple command: `hugo new site blog`. It creates a new blog folder with all required files inside.
 
 I launched the site with `hugo server --source blog/ -D`. I have a "Page Not Found" error, but it's expected as I didn't create any content at this point.
 
-## Setting up the theme
+## Setting up the Hugo theme
 
 ### Theme selection
 
@@ -263,7 +263,7 @@ I had an issue where CSS was not loaded. I redeployed the website, and it was fi
 
 ## Conclusion
 
-In conclusion, using a static site generator for my blog has been a great decision. It has provided me with a simple, secure, and cost-efficient solution for maintaining my blog.
+Using a static site generator for my blog has been a great decision. It has provided me with a simple, secure, and cost-efficient solution for maintaining my blog.
 
 ## Side notes
 
