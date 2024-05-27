@@ -25,10 +25,10 @@
 #   pageRef = "tags"
 #   weight = 30
 
-[[main]]
-  name = "About"
-  pageRef = "about"
-  weight = 40
+# [[main]]
+#   name = "About"
+#   pageRef = "about"
+#   weight = 40
 
 [[main]]
   name = "GitHub"
