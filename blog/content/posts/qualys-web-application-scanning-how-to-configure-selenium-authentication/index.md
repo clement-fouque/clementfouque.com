@@ -3,7 +3,7 @@ title = "Qualys Web Application: how to configure Selenium authentication?"
 date = 2024-09-29
 summary = "Discover why and how a static site generator like Hugo can be a game-changer for your blog's security, performance, and cost efficiency."
 slug = 'qualys-web-application-scanning-how-to-configure-selenium-authentication'
-draft = true
+draft = false
 +++
 
 
@@ -85,31 +85,45 @@ To verify that the Qualys Web Application Scanning integration with Selenium is 
 
 ![Qualys Browser Recorder successfull test](qualys_browser_recorder_test_successfull.png)
 
-The selenium script can be exported by saving the _test_ case. 
+The Selenium script used in our test case can be easily exported and the imported in Qualys. To do this, simply save the test case as follow.
 
 ![Qualys Browser Recorder save test case](qualys_browser_recorder_save_test_case.png)
 
 ## Creating the Qualys authentication record
 
-In Qualys WAS, we must create an authentication record, and then associate it with one or many web applications. 
+In Qualys WAS, configuring Selenium-based scanning requires creating an authentication record that can be associated with one or multiple web applications.
 
 To add a new authenticated record, we must go to _Configuration_ and then _Authentication_. The wizard is pretty straighforward. In the _regular expression to verify that the authentication completed successfully_, I've configured with `.*`, Qualys suggests to use _logout_, to ensure it's only accessible while logged in.
 
+To add a new authenticated record, we must navigate to _Configuration_ and then _Authentication_. The wizard is straightforward to follow. When setting up the regular expression to verify successful authentication, I've configured with `.*`, Qualys suggests to use _logout_, to ensure it's only accessible while logged in.
+
 ![Qualys WAS new selenium authentication](qualys_was_selenium_authentication.png)
 
-Once done, we need to associate the authentication record with the web application (in the web application settings). The easiest way is to open the drop down menu of the authentication record recently created and click on _Add To Web Applications_. If we want to associate multiple records to one web application, we can repeat this task. 
+After creating the authentication record, the next step is to link it to the relevant web application(s) in Qualys. This can be done by accessing the drop-down menu on the recently created authentication record and clicking on _Add To Web Applications_. If we need to associate multiple authentication records with a single web application, we must simply repeat this process.
 
 ## Testing authentication
 
-In the Applications menu, we can open the drop-down menu of the web applications and select _Test authentication_. We need to select the authentication record that will be evaluated. 
+To validate the authentication mechanism of a web application, we must open the drop-down menu of the web applications and select _Test authentication_. We need to select the authentication record that will be evaluated. From my experience, this can can take around 30 minutes to complete.
 
-Once complete, we can see the result in the _Scan List_ within _Scans_ tab. To have the details of the selenium script execution, 
+Once complete, we can see the result in the _Scan List_ within _Scans_ tab. Reviewing the following QIDs in the scan report can be particularly helpful for troubleshooting purposes.
+
+| QID | Name |
+|---|---|
+| 150094 | Selenium Web Application Authentication Was Successful |
+| 150095 | Selenium Web Application Authentication Failed |
+| 150100 | Selenium Diagnostics |
+
+{{< alert "lightbulb">}}
+Qualys is currently developing an updated scanning engine, which may address authentication issues experienced by some users. While I'm not aware of its specific features or release date, you can open a support case to have it enabled for your application(s) if desired. In my own experience, switching to this new engine resolved authentication problems that had previously been puzzling.
+{{< /alert >}}
 
 ## Replacing variables with Qualys
 
-One of the recently added feature (at least to me) is the ability to not store credentials in the Selenium script directly, but in the authentication record directly, in Qualys WAS module. From the security perspective, it's better as we reduce the likelihood of exporting and sharing the script with credentials. It has also the benefit to have a unique selenium script despite the environment or role it is tested on.
+Qualys provides a more secure way to store credentials directly in the configuration, rather than hardcoding them in the Selenium script. This approach reduces the risk of exposing sensitive information and makes it easier to update credentials if they change.
 
-We have 3 variables available that we'll add to our Selenium script
+We have 3 variables available that we can use in our selenium script. I wasn't able to make the `@@webappURL@@` works, Qualys documentation contains [an example](https://docs.qualys.com/en/was/latest/web_applications/create_selenium_script.htm) though. 
+
+To take advantage of this feature, we can use some of the three built-in variables in the Selenium script. While I was unable to get the `@@webappURL@@` variable working initially, Qualys documentation offers a helpful  [example](https://docs.qualys.com/en/was/latest/web_applications/create_selenium_script.htm) for implementation.
 
 | WAS Parameter | Description |
 |---|---|
@@ -117,19 +131,6 @@ We have 3 variables available that we'll add to our Selenium script
 |@@authusername@@	| Use to fetch username of the login form. |
 |@@authpassword@@	| Use to fetch password of the login form. |
 
-## Launching a test authentication scan
-
-### Troubleshooting
-
-Qualys is developing a new version of their scanning engine. I don't have the details of what it brings and when it’ll be enabled by default. At the moment of writing, it's not enabled by default. You can open a case to Qualys support and they'll enable it for your application(s).
-
-If you have authentication issues and you don't understand the reason, move to the new engine. I had issues and moving to the new one solved it.
-
-### Updating schedule scan with the new authentication record
-
-{{< alert "lightbulb">}}
-Warning: Once you have updated the default authentication of your web application, you have to update also associated schedules. If you don't do that, you'll continue scanning with the former authentication record.
-{{< /alert >}}
-
 ## Conclusion
-By automating the login process and leveraging Qualys' capabilities, testers gain deeper insights into potential security weaknesses within restricted areas of their web applications.
+
+By automating the login process through Selenium authentication, testers can unlock deeper insights into potential security vulnerabilities hidden within restricted areas of their web applications. This streamlined approach not only saves time but also enables more comprehensive testing, revealing weaknesses that might otherwise go undetected.
