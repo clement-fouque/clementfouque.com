@@ -1,5 +1,5 @@
 +++
-title = "Qualys Web Applicatio Scanning: how to configure Selenium authentication?"
+title = "Qualys Web Application Scanning: how to configure Selenium authentication?"
 date = 2024-09-29
 summary = "Discover why and how a static site generator like Hugo can be a game-changer for your blog's security, performance, and cost efficiency."
 slug = 'qualys-web-application-scanning-how-to-configure-selenium-authentication'
