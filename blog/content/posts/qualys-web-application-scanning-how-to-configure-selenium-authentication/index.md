@@ -1,7 +1,7 @@
 +++
 title = "Qualys Web Application Scanning: how to configure Selenium authentication?"
 date = 2024-09-29
-summary = "Discover why and how a static site generator like Hugo can be a game-changer for your blog's security, performance, and cost efficiency."
+summary = "Why and how configuring authentication on Qualys Web Application Scanning with a selenium script"
 slug = 'qualys-web-application-scanning-how-to-configure-selenium-authentication'
 draft = false
 +++
