@@ -6,11 +6,13 @@ slug = "testing-elastic-integrations-locally"
 draft = true
 +++
 
-I maintain Elastic Agent integrations that bring security data into Elasticsearch. Some are native integrations, such as Qualys, HackerOne, and Snyk. Others are custom, such as one that ingests JSON files from a private GitHub repository. In our environment, the integration is only the first part of the data path. Custom ingest pipelines, component templates, ILM policies, and transforms change the data before anyone searches it. When something broke in that layer, I had to troubleshoot it in production: change the configuration, wait for new data, check the result, and start again. Each cycle was slow, and each mistake reached real data.
+I maintain Elastic Agent integrations that bring security data into Elasticsearch. Some are native integrations, such as Qualys, HackerOne, and Snyk. Others are custom, such as one that ingests JSON files from a private GitHub repository. In our environment, the integration is only the first part of the data path. Custom ingest pipelines, component templates, ILM policies, and transforms change the data before anyone searches it. When something broke in that layer, I had to troubleshoot it in production: change the configuration, wait for new data, check the result, and start again. Production access was limited, so I could not always reproduce the issue in the same way. Each cycle was slow, and each mistake reached real data. Local reproduction was not simpler because setting up the environment took time and still had to match the real configuration.
 
 To shorten that loop, I built a setup to test Elastic Agent integrations locally with a configuration similar to the one I deploy to production. `elastic-package` starts Elasticsearch and Kibana. Then one command per integration uses OpenTofu to install the integration package and deploy my Elasticsearch resources and Kibana detection rules from JSON files, and Docker Compose to start a standalone Elastic Agent. I can reproduce a problem, test a fix, and compare the result with production before I roll anything out.
 
-This post explains why I built the setup this way, using one real use case: a Slack notification when GitHub publishes a new malware advisory. The native GitHub integration collects the advisories, and a Kibana detection rule sends the message. I built and tested the whole chain on a local stack before it reached production. The setup will become v2 of the [elastic-integrations-standalone repository](https://github.com/clement-fouque/elastic-integrations-standalone).
+This post explains why I created a new version of my standalone repository. It can now deploy the Elastic stack, the Elastic resources, and the ingestion flow automatically, then test the result before anything reaches production. 
+
+The example is a Slack notification when GitHub publishes a new malware advisory. The native GitHub integration collects the advisories, and a Kibana detection rule sends the message. I built and tested the whole chain on a local stack before it reached production. This is the foundation for v2 of the [elastic-integrations-standalone repository](https://github.com/clement-fouque/elastic-integrations-standalone).
 
 ![Flow diagram: elastic-package starts Elasticsearch and Kibana, OpenTofu deploys JSON resources, Docker Compose starts the standalone Elastic Agent, the Agent sends GitHub advisories to a data stream, a detection rule sends new malware advisories to Slack, and test results feed back into the JSON resources](local-integration-flow.png)
 
@@ -56,15 +58,14 @@ make deploy-local INTEGRATION=github_security_advisories
 
 Most of the time, I run both commands one after the other to start from a clean environment. I still keep them separate on purpose. When I only change a rule or a template, I can redeploy the integration and leave the stack running. I can also deploy several integrations on the same stack.
 
-The current baseline uses Elasticsearch, Kibana, and Elastic Agent 9.5.5, the GitHub integration package 2.32.0, OpenTofu 1.13.1, and `elastic-package` 0.126.4. I will update these numbers if they change before the v2 release.
-
 With the stack running, I can build the malware advisory notification.
 
 ## From advisory data to a Slack alert
 
 The Agent configuration runs three streams: reviewed, unreviewed, and malware advisories. All three write to the same data stream, so the rule filters on `github.security_advisory.type`.
 
-The first version of the rule was harder to get right than I expected. The Agent polls GitHub every 24 hours and ingests the full advisory list each time, so a simple query rule would alert on the same advisories every day. The rule also must not alert on years of old advisories on its first run. I iterated on the query, the lookback, and the Slack message many times. Each iteration was `make deploy-local`, a restart of the Agent, and a look at Slack. Doing this in production would have sent test messages to a real channel.
+The first version of the rule was harder to get right than I expected. The Agent polls GitHub every 24 hours and ingests the full advisory list each time, so a simple query rule would alert on the same advisories every day. The rule also must not alert on years of old advisories on its first run. I iterated on the query, the lookback, and the Slack message many times. Each iteration was `make deploy-local`, a restart of the Agent, and a look at Slack. 
+
 
 The final rule is a new terms rule. It alerts only the first time a `ghsa_id` appears in a 14-day history window, and only for advisories published in the last 7 days. Here is an excerpt of `detection_rules/github-malware-advisory-published.json`:
 
@@ -105,7 +106,7 @@ Every file in this section is JSON, and that is a deliberate choice.
 
 OpenTofu decides the deployment order and tracks state. The Elasticsearch resources themselves live in JSON files whenever possible, one folder per resource type under `integrations/<name>/`.
 
-I chose JSON because Elasticsearch speaks JSON. When I read a component template from production with the API, I get JSON. When I write the same template in the repository, it is also JSON. I can compare the two files with `diff`, or copy a production resource into the repository to reproduce a problem.
+I chose JSON because Elasticsearch speaks JSON. When I read a component template from production with the API, I get JSON. When I write the same template in the repository, it is also JSON. I can compare the two files, or copy a production resource into the repository to reproduce a problem.
 
 If I had written these resources as Terraform blocks, every comparison would need a translation step from HCL to the API format and back. That step is easy to get wrong when you are in the middle of an incident.
 
@@ -115,9 +116,6 @@ Detection rules follow the same idea. Each rule is a JSON file in the format of 
 
 A local stack is a single node with a small amount of data. It will not show performance problems, shard sizing issues, or behavior that only appears with production volume. Cross-cluster search, security roles, and network rules are also outside its scope.
 
-There is also a version risk. If the local stack, package, or Agent version differs from production, a test can pass locally and fail after deployment. I pin all three for that reason.
-
-A local stack also does not have production's alert volume. The Slack test shows that the rule and the message work. It does not show how many alerts the team will receive in a busy week.
 
 For detection rules, mappings, and ingest changes, these limits are acceptable. Those changes depend on the data shape and the configuration, and both are the same locally.
 
