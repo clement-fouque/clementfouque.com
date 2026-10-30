@@ -1,21 +1,23 @@
 +++
 title = "Test the Elastic data path end to end locally before production"
-date = 2026-10-23
-summary = "One local setup runs the Elastic stack, a standalone Elastic Agent, my custom Elasticsearch resources, Kibana detection rules, and test data, so I can test integration changes before they reach production."
+date = 2026-10-30
+summary = "Test Elastic Agent integrations, ingest pipelines, and detection rules locally with elastic-package, OpenTofu, and Docker before they reach production."
+keywords = ["Elastic Agent", "Elastic integrations", "elastic-package", "OpenTofu", "Kibana detection rules", "ES|QL", "EPSS", "GitHub Security Advisories"]
+featureAlt = "Open paint buckets in many colors seen from above"
 slug = "testing-elastic-data-path-locally"
-draft = true
+draft = false
 +++
 
-I maintain Elastic Agent integrations that bring security data into Elasticsearch. Some are native, such as Qualys, HackerOne, and Snyk, and others are custom. Even the native ones need custom ingest pipelines to fit our needs. When something broke in that custom layer, troubleshooting was slow: production access was limited, and building a local environment that matched production took more time than the fix itself.
+I maintain Elastic Agent integrations that bring [security data into Elasticsearch](https://www.elastic.co/blog/how-infosec-uses-elastic-stack-vulnerability-management). Some are native, such as Qualys, HackerOne, and Snyk, and others are custom. Even the native ones need custom ingest pipelines to fit our needs. When something broke in that custom layer, troubleshooting was slow: production access was limited, and building a local environment that matched production took more time than the fix itself.
 
 So I built a new version of my [standalone repository](https://github.com/clement-fouque/elastic-integrations-standalone). Two commands start a local Elastic stack and deploy an integration together with the resources and rules around it. This post explains that design and shows two real examples: a Slack alert when GitHub publishes a new malware advisory, and one when the exploit prediction score of a CVE rises quickly.
 
 ![Flow diagram: elastic-package starts Elasticsearch and Kibana, OpenTofu deploys JSON resources, Docker Compose starts the standalone Elastic Agent, the Agent sends GitHub advisories to a data stream, a detection rule sends new malware advisories to Slack, and test results feed back into the JSON resources](local-integration-flow.png)
 
 
-## The problem
+## Why package tests are not enough
 
-Testing an integration package on its own is easy. `elastic-package` can start a stack and run the package's system tests. That tells me the package works, but it does not tell me what my environment does with the data.
+Testing an integration package on its own is easy. [`elastic-package`](https://github.com/elastic/elastic-package) can start a stack and run the package's system tests. That tells me the package works, but it does not tell me what my environment does with the data.
 
 In production, the data path has more parts than the package:
 
@@ -32,7 +34,7 @@ A bug can come from any of these parts, or from how they interact. I wanted all 
 
 ### One folder per integration
 
-Each integration has a folder under `integrations/` with its Agent policy and its resources, and an OpenTofu root under `infrastructure/` that deploys them. Here is the layout from the repository README:
+Each integration has a folder under `integrations/` with its Agent policy and its resources, and an [OpenTofu](https://opentofu.org/) root under `infrastructure/` that deploys them. Here is the layout from the repository README:
 
 ```text
 .
@@ -77,7 +79,7 @@ The second command deploys one integration:
 make deploy-local INTEGRATION=github_security_advisories
 ```
 
-It runs OpenTofu `init`, `plan`, and `apply`, loads the integration's test data if it has any, then restarts the standalone Elastic Agent with Docker Compose. OpenTofu installs the integration package, then deploys the Elasticsearch resources and the Kibana rules and connectors.
+It runs OpenTofu `init`, `plan`, and `apply`, loads the integration's test data if it has any, then restarts the [standalone Elastic Agent](https://www.elastic.co/docs/reference/fleet/install-standalone-elastic-agent) with Docker Compose. OpenTofu installs the integration package, then deploys the Elasticsearch resources and the Kibana rules and connectors.
 
 I usually run both commands one after the other to start from a clean environment. They stay separate because I do not always need a new stack. When I only change a rule or a template, I redeploy the integration and keep the stack running.
 
@@ -96,7 +98,7 @@ A malware advisory in the [GitHub Advisory Database](https://github.com/advisori
 
 The [GitHub integration](https://www.elastic.co/docs/reference/integrations/github) already collects advisories into `logs-github.security_advisories-default`. The Agent policy runs three streams (reviewed, unreviewed, and malware), and all three write to the same data stream. I needed a detection rule and a Slack connector.
 
-### The final rule
+### The final detection rule
 
 The GitHub Agent polls every 24 hours and ingests the full advisory list each time, so the rule needs to avoid repeating the same alert on the same advisory. It also needs to ignore old advisories on the first run. The final solution is a new terms rule that alerts only when a new `ghsa_id` appears in the last 14 days and only when the advisory was published in the last 7 days. Those numbers are arbitrary, but they are easy to adjust in the JSON if the team wants a longer or shorter window. This design is tied to the full ingest that the integration does today. When it supports incremental ingest, I will adapt the polling interval and the rule.
 
@@ -159,7 +161,7 @@ I built the file by exporting a few real CVEs with `escli utils dump` from a sta
 | CVE-2026-110447 | 0.11634, then 0.52 two days later | Rises by 0.40: alert |
 | CVE-2023-31719 | 0.26032, then 0.35 two days later | Rises by 0.09: no alert |
 
-### The rule
+### The ES|QL rule for a rising score
 
 With history in the data stream, the rule can compare scores. Here is the core of the query from `detection_rules/first-epss-score-rise-3-days.json`:
 
